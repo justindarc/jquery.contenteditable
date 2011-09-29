@@ -45,7 +45,7 @@
               '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="contenteditable" contenteditable="true"></div>' +
+          '<div class="contenteditable" contenteditable="true"/>' +
         '</div>';
 
       $item.html(html);

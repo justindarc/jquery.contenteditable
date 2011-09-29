@@ -17,6 +17,19 @@
   overflow-y: auto;
 }
 
+.nav > li {
+  width: 40px;
+  text-align: center;
+}
+
+.nav > li:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav > li.active:hover {
+  background: none;
+}
+
 .topbar {
   position: relative;
 }
