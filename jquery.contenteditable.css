@@ -17,6 +17,11 @@
   overflow-y: auto;
 }
 
+.cursor {
+  background-image: url('images/cursor.gif');
+  padding-right: 1px;
+}
+
 .nav > li {
   width: 40px;
   text-align: center;

@@ -31,6 +31,8 @@
     return this.each(function(index, item) {
       var $item = $(item);
       
+      var isContentEditableSupported = _isContentEditableSupported();
+      
       var html = '' +
         '<div class="content">' +
           '<div class="topbar">' +
@@ -45,7 +47,10 @@
               '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="contenteditable" contenteditable="true"/>' +
+          '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '>' +
+          ((isContentEditableSupported) ? '' : '<span class="cursor"/>') + 
+          '</div>' +
+          ((isContentEditableSupported) ? '' : '<textarea/>') + 
         '</div>';
 
       $item.html(html);
@@ -53,9 +58,31 @@
       var $nav = $item.find('ul.nav');
       
       $nav.delegate('a', 'click', function(evt) {
-        $this = $(this);
+        var $this = $(this);
         $this.parent().toggleClass('active');
       });
+      
+      var $contenteditable = $item.find('div.contenteditable');
+      
+      if (!isContentEditableSupported) {
+        var $textarea = $item.find('textarea');
+      
+        $textarea.css({
+          width: $contenteditable.outerWidth() + 'px',
+          height: $contenteditable.outerHeight() + 'px',
+          position: 'relative',
+          top: (0 - $contenteditable.outerHeight()) + 'px'
+        });
+      
+        $textarea.fadeTo(0, 0);
+      
+        $textarea.bind('keyup', function(evt) {
+          var $this = $(this);
+        
+          $contenteditable.text($contenteditable.text() + $this.val());
+          $this.val('');
+        });
+      }
     });
     
   };
@@ -66,6 +93,34 @@
 	//};
 
 	// Private function definitions.
-	//var foobar = function() {};
+	var _isContentEditableSupported = function() {
+	  if (_is_iOS()) {
+	    var iOSVersion = _iOSVersion();
+	    var majorVersion = (iOSVersion && iOSVersion.split('.').length > 0) ? parseInt(iOSVersion.split('.')[0], 10) : 0;
+	    
+	    if (majorVersion < 5) {
+	      return false;
+	    }
+	  }
+	  
+	  return true;
+	};
+	
+	var _is_iOS = function() {
+	  return (navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i)) || (navigator.userAgent.match(/iPad/i));
+	};
+	
+	var _iOSVersion = function() {
+	  var regex = /OS (([0-9]+)_)+([0-9]+){1} like/;
+	  var matches = regex.exec(navigator.userAgent);
+	  
+	  matches = (matches && matches.length > 0) ? matches[0].split(' ') : null;
+	  
+	  if (matches && matches.length === 3) {
+	    return matches[1].replace(/_/g, '.');
+	  }
+	  
+	  return undefined;
+	}
 
 })(jQuery);
