@@ -49,6 +49,12 @@
           '</div>' +
           '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '/>' +
           ((isContentEditableSupported) ? '' : '<input type="text" class="cursor" autocapitalize="off"/>') +
+          ((true) ? '' : '' + // TODO: Replace with isContentEditableSupported
+            '<div class="context-menu">' +
+              '<div class="arrow"/>' +
+              '<div class="inner"><a href="#">Select</a></div>' +
+            '</div>'
+            ) +
         '</div>' +
         ((isContentEditableSupported) ? '' : '' +
           '<style type="text/css">' +
@@ -56,6 +62,9 @@
               'display: inline-block;' +
               'float: left;' +
               'clear: left;' +
+            '}' +
+            '.contenteditable span.selected {' +
+              'background: rgba(0, 112, 255, 0.3)' +
             '}' +
           '</style>');
 
@@ -83,7 +92,7 @@
       
       if (!isContentEditableSupported) {
         var $cursor = $item.find('input.cursor');
-        var $textarea = $item.find('textarea');
+        var $contextMenu = $item.find('div.context-menu');
         var $active = $('<div/>');
         var activeIndex = 0;
         
@@ -93,6 +102,11 @@
           left: $active.offset().left + 'px',
           top: $active.offset().top + 'px'
         });
+        
+        $contextMenu.css({
+          left: ($active.offset().left - ($contextMenu.outerWidth() / 2)) + 'px',
+          top: ($active.offset().top - $contextMenu.outerHeight()) + 'px'
+        })
         
         var touch = null;
         
