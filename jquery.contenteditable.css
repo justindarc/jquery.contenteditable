@@ -8,6 +8,7 @@
   -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
      -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
           box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  -webkit-touch-callout: none;
 }
 
 .contenteditable {
@@ -32,16 +33,14 @@
      -moz-box-shadow: none;
           box-shadow: none;
   -webkit-focus-ring-color: none;
-  -webkit-touch-callout: none;
 }
 
 .cursor:focus {
   outline: none;
-  -webkit-focus-ring-color: none;
-  -webkit-touch-callout: none;
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
           box-shadow: none;
+  -webkit-focus-ring-color: none;
   filter: alpha(opacity=0);
   -khtml-opacity: 0;
     -moz-opacity: 0;
@@ -58,6 +57,10 @@
 }
 
 .nav > li.active:hover {
+  background: none;
+}
+
+.nav.touch > li:hover {
   background: none;
 }
 

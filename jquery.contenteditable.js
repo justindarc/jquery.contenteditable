@@ -65,8 +65,19 @@
       
       $nav.delegate('a', 'click', function(evt) {
         var $this = $(this);
+        
         $this.parent().toggleClass('active');
+
+        if (!isContentEditableSupported) {
+          $cursor.focus();
+        }
+        
+        evt.preventDefault();
       });
+      
+      if (_is_iOS()) {
+        $nav.addClass('touch');
+      }
       
       var $contenteditable = $item.find('div.contenteditable');
       
@@ -78,7 +89,18 @@
         
         $contenteditable.append($active);
         
+        $cursor.css({
+          left: $active.offset().left + 'px',
+          top: $active.offset().top + 'px'
+        });
+        
         var touch = null;
+        
+        $(document.body).bind('mousedown touchstart', function(evt) {
+          if (!$.contains(item, evt.target)) {
+            $cursor.blur();
+          }
+        });
         
         $contenteditable.bind('mousedown touchstart', function(evt) {
           this.isMouseDown = true;
