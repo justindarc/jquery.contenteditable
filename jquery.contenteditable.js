@@ -124,7 +124,7 @@
             var elements = $contenteditable.find('div');
             
             for (var i = 0; i < elements.length; i++) {
-              if (_isTouchInElementLine(touch, elements[i])) {
+              if (elements.length === 1 || i === elements.length - 1 || _isTouchInElementLine(touch, elements[i])) {
                 var $element = $(elements[i]);
                 var characters = $element.text().split('');
                 var html = $element.html();
