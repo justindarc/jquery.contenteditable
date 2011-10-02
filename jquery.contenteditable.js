@@ -136,7 +136,9 @@
                 var $element = $(elements[i]);
                 var characters = $element.text().split('');
                 
-                $element.html('<span>' + characters.join('</span><span>') + '</span>');
+                if (characters.length > 0) {
+                  $element.html('<span>' + characters.join('</span><span>') + '</span>');
+                }
 
                 var offset;
                 var spans = $element.children('span');
