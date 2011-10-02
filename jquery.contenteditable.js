@@ -49,7 +49,6 @@
           '</div>' +
           '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '/>' +
           ((isContentEditableSupported) ? '' : '<input type="text" class="cursor"/>') +
-          '<div class="debug"/>' +
         '</div>';
 
       $item.html(html);
@@ -158,7 +157,7 @@
           
           if (keyCode === 8) {
             if ($active) {
-              if ($active.is(':empty')) {
+              if ($active.is(':empty') || $active.children('br').size() === 1) {
                 if ($contenteditable.children().size() > 1) {
                   var $previousActive = $active;
                 
@@ -181,7 +180,7 @@
             var $newLine = $('<div/>');
             
             if ($active.is(':empty')) {
-              $active.html('&nbsp;');
+              $active.html('<br/>');
             }
             
             $active.after($newLine);
