@@ -17,9 +17,39 @@
   overflow-y: auto;
 }
 
+.contenteditable div {
+  display: inline-block;
+  float: left;
+  clear: left;
+}
+
 .cursor {
-  background-image: url('images/cursor.gif');
-  padding-right: 1px;
+  border: none;
+  outline: none;
+  padding: 0px;
+  position: absolute;
+  width: 4px;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+          border-radius: 0;
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+  -webkit-focus-ring-color: none;
+}
+
+.cursor:focus {
+  outline: none;
+  padding-left: 3px;
+  -webkit-focus-ring-color: none;
+  -webkit-box-shadow: none;
+     -moz-box-shadow: none;
+          box-shadow: none;
+  filter: alpha(opacity=0);
+  -khtml-opacity: 0;
+    -moz-opacity: 0;
+         opacity: 0;
 }
 
 .nav > li {

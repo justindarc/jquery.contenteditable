@@ -47,10 +47,9 @@
               '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '>' +
-          ((isContentEditableSupported) ? '' : '<span class="cursor"/>') + 
-          '</div>' +
-          ((isContentEditableSupported) ? '' : '<textarea/>') + 
+          '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '/>' +
+          ((isContentEditableSupported) ? '' : '<input type="text" class="cursor"/>') +
+          '<div class="debug"/>' +
         '</div>';
 
       $item.html(html);
@@ -65,22 +64,152 @@
       var $contenteditable = $item.find('div.contenteditable');
       
       if (!isContentEditableSupported) {
+        var $cursor = $item.find('input.cursor');
         var $textarea = $item.find('textarea');
-      
-        $textarea.css({
-          width: $contenteditable.outerWidth() + 'px',
-          height: $contenteditable.outerHeight() + 'px',
-          position: 'relative',
-          top: (0 - $contenteditable.outerHeight()) + 'px'
-        });
-      
-        $textarea.fadeTo(0, 0);
-      
-        $textarea.bind('keyup', function(evt) {
-          var $this = $(this);
+        var $active = $('<div/>');
         
-          $contenteditable.text($contenteditable.text() + $this.val());
-          $this.val('');
+        $contenteditable.append($active);
+        
+        var touch = null;
+        
+        $contenteditable.bind('mousedown touchstart', function(evt) {
+          this.isMouseDown = true;
+          
+          if (evt.type === 'touchstart') {            
+            if (evt.originalEvent && evt.originalEvent.touches) {
+              touch = {
+                x: evt.originalEvent.touches[0].clientX,
+                y: evt.originalEvent.touches[0].clientY
+              };
+              
+              $cursor.css({
+                left: touch.x + 'px',
+                top: touch.y + 'px'
+              });
+            }
+          } else {
+            $cursor.blur();
+          }
+        });
+        
+        $contenteditable.bind('mousemove touchmove', function(evt) {
+          if (!this.isMouseDown) return false;
+          
+          if (evt.type === 'touchmove') {
+            if (evt.originalEvent.touches) {
+              touch = {
+                x: evt.originalEvent.touches[0].clientX,
+                y: evt.originalEvent.touches[0].clientY
+              };
+              
+              $cursor.css({
+                left: touch.x + 'px',
+                top: touch.y + 'px'
+              });
+              
+              // TODO: Conditionally prevent the default behavior depending on cursor position.
+              evt.preventDefault();
+            }
+          } else {
+            
+          }
+        });
+        
+        $contenteditable.bind('mouseup touchend', function(evt) {
+          this.isMouseDown = false;
+          
+          if (evt.type === 'touchend') {
+            $cursor.trigger('click');
+
+            var elements = $contenteditable.find('div');
+            
+            for (var i = 0; i < elements.length; i++) {
+              if (_isTouchInElementLine(touch, elements[i])) {
+                var $element = $(elements[i]);
+                var characters = $element.text().split('');
+                var html = $element.html();
+                
+                $element.html('<span>' + characters.join('</span><span>') + '</span>');
+                
+                // TODO: Locate character position using <span/> tags.
+                
+                $element.html(html);
+                
+                var offset = $element.offset();
+                
+                $cursor.css({
+                  left: (offset.left + $element.width()) + 'px',
+                  top: offset.top + 'px'
+                });
+                
+                break;
+              }
+            }
+          } else {
+            $cursor.focus();
+          }
+        });
+        
+        $cursor.bind('keydown', function(evt) {
+          var $this = $(this);
+          
+          var keyCode = evt.which;
+          var html = ($active) ? $active.html() : '';
+          
+          if (keyCode === 8) {
+            if ($active) {
+              if ($active.is(':empty')) {
+                if ($contenteditable.children().size() > 1) {
+                  var $previousActive = $active;
+                
+                  $active = $active.prev();
+                  $previousActive.remove();
+                }
+              } else {
+                $active.html(html.slice(0, -1));
+              }
+            }
+          }
+        });
+        
+        $cursor.bind('keypress', function(evt) {
+          var $this = $(this);
+          
+          var keyCode = evt.which;
+          
+          if (keyCode === 13) {
+            var $newLine = $('<div/>');
+            
+            if ($active.is(':empty')) {
+              $active.html('&nbsp;');
+            }
+            
+            $active.after($newLine);
+            $active = $newLine;
+          }
+        });
+        
+        $cursor.bind('keyup', function(evt) {
+          var $this = $(this);
+          
+          var value = $this.val();
+          
+          if (value) {
+            if (value === ' ') {
+              value = '&nbsp;';
+            }
+          
+            $active.html($active.html() + value);
+          
+            $this.val('');
+          }
+          
+          var offset = $active.offset();
+        
+          $cursor.css({
+            left: (offset.left + $active.width() - 5) + 'px',
+            top: offset.top + 'px'
+          });
         });
       }
     });
@@ -121,6 +250,15 @@
 	  }
 	  
 	  return undefined;
-	}
+	};
+	
+	var _isTouchInElementLine = function(touch, element) {
+	  var $element = $(element);
+	  var offset = $element.offset();
+	  var y1 = offset.top;
+	  var y2 = offset.top + $element.height();
+	  
+	  return (y1 <= touch.y && touch.y <= y2);
+	};
 
 })(jQuery);
