@@ -48,7 +48,7 @@
             '</div>' +
           '</div>' +
           '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '/>' +
-          ((isContentEditableSupported) ? '' : '<input type="text" class="cursor"/>') +
+          ((isContentEditableSupported) ? '' : '<input type="text" class="cursor" autocapitalize="off"/>') +
         '</div>';
 
       $item.html(html);
@@ -137,7 +137,7 @@
                 var offset = $element.offset();
                 
                 $cursor.css({
-                  left: (offset.left + $element.width()) + 'px',
+                  left: (offset.left + $element.width() - 5) + 'px',
                   top: offset.top + 'px'
                 });
                 
