@@ -49,7 +49,15 @@
           '</div>' +
           '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '/>' +
           ((isContentEditableSupported) ? '' : '<input type="text" class="cursor" autocapitalize="off"/>') +
-        '</div>';
+        '</div>' +
+        ((isContentEditableSupported) ? '' : '' +
+          '<style type="text/css">' +
+            '.contenteditable div {' +
+              'display: inline-block;' +
+              'float: left;' +
+              'clear: left;' +
+            '}' +
+          '</style>');
 
       $item.html(html);
       
@@ -133,6 +141,8 @@
                 // TODO: Locate character position using <span/> tags.
                 
                 $element.html(html);
+                
+                $active = $element;
                 
                 var offset = $element.offset();
                 

@@ -17,12 +17,6 @@
   overflow-y: auto;
 }
 
-.contenteditable div {
-  display: inline-block;
-  float: left;
-  clear: left;
-}
-
 .cursor {
   border: none;
   outline: none;
