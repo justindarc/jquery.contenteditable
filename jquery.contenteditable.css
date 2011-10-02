@@ -23,7 +23,7 @@
   margin-left: -2px;
   padding: 0px;
   position: absolute;
-  width: 4px;
+  width: 2px;
   -webkit-appearance: none;
   -webkit-border-radius: 0;
      -moz-border-radius: 0;
@@ -32,11 +32,13 @@
      -moz-box-shadow: none;
           box-shadow: none;
   -webkit-focus-ring-color: none;
+  -webkit-touch-callout: none;
 }
 
 .cursor:focus {
   outline: none;
   -webkit-focus-ring-color: none;
+  -webkit-touch-callout: none;
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
           box-shadow: none;
