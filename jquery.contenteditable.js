@@ -150,7 +150,6 @@
                     
                     activeIndex = j;
                     offset = $span.offset();
-                    offset.left -= 5;
                     
                     break;
                   }
@@ -159,7 +158,7 @@
                 if (!offset) {
                   activeIndex = characters.length;
                   offset = $element.offset();
-                  offset.left += ($element.width() - 5);
+                  offset.left += $element.width();
                 }
                 
                 $active = $element;
@@ -195,7 +194,9 @@
                   $previousActive.remove();
                   
                   offset = $active.offset();
-                  offset += ($active.width() - 5);
+                  offset.left += $active.width();
+                  
+                  activeIndex = $active.text().length;
                 }
               } else {
                 var value = text.substring(0, activeIndex - 1);
@@ -203,7 +204,7 @@
                 $active.html(value);
                 
                 offset = $active.offset();
-                offset.left += ($active.width() - 5);
+                offset.left += $active.width();
                 
                 $active.html(value + text.substring(activeIndex, text.length));
                 
@@ -236,9 +237,11 @@
             $active = $newLine;
             
             var offset = $active.offset();
+            
+            offset.left += $active.width();
         
             $cursor.css({
-              left: (offset.left + $active.width() - 5) + 'px',
+              left: offset.left + 'px',
               top: offset.top + 'px'
             });
           }
@@ -261,7 +264,7 @@
               
               activeIndex = value.length;
               offset = $active.offset();
-              offset.left += ($active.width() - 5);
+              offset.left += $active.width();
             } else {
               var text = $active.text();
               var previousIndex = activeIndex;
@@ -272,7 +275,7 @@
               $active.html(value);
               
               offset = $active.offset();
-              offset.left += ($active.width() - 5);
+              offset.left += $active.width();
               
               $active.html(value + text.substring(previousIndex));
             }

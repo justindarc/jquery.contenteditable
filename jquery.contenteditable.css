@@ -20,6 +20,7 @@
 .cursor {
   border: none;
   outline: none;
+  margin-left: -2px;
   padding: 0px;
   position: absolute;
   width: 4px;
@@ -35,7 +36,6 @@
 
 .cursor:focus {
   outline: none;
-  padding-left: 3px;
   -webkit-focus-ring-color: none;
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
