@@ -74,6 +74,7 @@
         var $cursor = $item.find('input.cursor');
         var $textarea = $item.find('textarea');
         var $active = $('<div/>');
+        var activeIndex = 0;
         
         $contenteditable.append($active);
         
@@ -131,23 +132,38 @@
             var elements = $contenteditable.find('div');
             
             for (var i = 0; i < elements.length; i++) {
-              if (elements.length === 1 || i === elements.length - 1 || _isTouchInElementLine(touch, elements[i])) {
+              if (i === elements.length - 1 || _isTouchInElementLine(touch, elements[i])) {
                 var $element = $(elements[i]);
                 var characters = $element.text().split('');
-                var html = $element.html();
                 
                 $element.html('<span>' + characters.join('</span><span>') + '</span>');
+
+                var offset;
+                var spans = $element.children('span');
                 
-                // TODO: Locate character position using <span/> tags.
+                // Locate character position using <span/> tags.
+                for (var j = 0; j < spans.length; j++) {
+                  if (_isTouchInElement(touch, spans[j])) {
+                    var $span = $(spans[j]);
+                    
+                    activeIndex = j;
+                    offset = $span.offset();
+                    offset.left -= 5;
+                    
+                    break;
+                  }
+                }
                 
-                $element.html(html);
+                if (!offset) {
+                  activeIndex = characters.length;
+                  offset = $element.offset();
+                  offset.left += ($element.width() - 5);
+                }
                 
                 $active = $element;
                 
-                var offset = $element.offset();
-                
                 $cursor.css({
-                  left: (offset.left + $element.width() - 5) + 'px',
+                  left: offset.left + 'px',
                   top: offset.top + 'px'
                 });
                 
@@ -163,19 +179,40 @@
           var $this = $(this);
           
           var keyCode = evt.which;
-          var html = ($active) ? $active.html() : '';
+          var text = ($active) ? $active.text() : '';
           
           if (keyCode === 8) {
             if ($active) {
+              var offset;
+              
               if ($active.is(':empty') || $active.children('br').size() === 1) {
                 if ($contenteditable.children().size() > 1) {
                   var $previousActive = $active;
                 
                   $active = $active.prev();
                   $previousActive.remove();
+                  
+                  offset = $active.offset();
+                  offset += ($active.width() - 5);
                 }
               } else {
-                $active.html(html.slice(0, -1));
+                var value = text.substring(0, activeIndex - 1);
+                
+                $active.html(value);
+                
+                offset = $active.offset();
+                offset.left += ($active.width() - 5);
+                
+                $active.html(value + text.substring(activeIndex, text.length));
+                
+                activeIndex -= (activeIndex > 0) ? 1 : 0;
+              }
+
+              if (offset) {
+                $cursor.css({
+                  left: offset.left + 'px',
+                  top: offset.top + 'px'
+                });
               }
             }
           }
@@ -195,6 +232,13 @@
             
             $active.after($newLine);
             $active = $newLine;
+            
+            var offset = $active.offset();
+        
+            $cursor.css({
+              left: (offset.left + $active.width() - 5) + 'px',
+              top: offset.top + 'px'
+            });
           }
         });
         
@@ -207,18 +251,37 @@
             if (value === ' ') {
               value = '&nbsp;';
             }
-          
-            $active.html($active.html() + value);
+            
+            var offset;
+            
+            if ($active.is(':empty') || $active.children('br').size() === 1) {
+              $active.html(value);
+              
+              activeIndex = value.length;
+              offset = $active.offset();
+              offset.left += ($active.width() - 5);
+            } else {
+              var text = $active.text();
+              var previousIndex = activeIndex;
+              
+              value = text.substring(0, activeIndex) + value;
+              activeIndex = value.replace(/&nbsp;/g, ' ').length;
+              
+              $active.html(value);
+              
+              offset = $active.offset();
+              offset.left += ($active.width() - 5);
+              
+              $active.html(value + text.substring(previousIndex));
+            }
           
             $this.val('');
-          }
-          
-          var offset = $active.offset();
         
-          $cursor.css({
-            left: (offset.left + $active.width() - 5) + 'px',
-            top: offset.top + 'px'
-          });
+            $cursor.css({
+              left: offset.left + 'px',
+              top: offset.top + 'px'
+            });
+          }
         });
       }
     });
@@ -259,6 +322,17 @@
 	  }
 	  
 	  return undefined;
+	};
+	
+	var _isTouchInElement = function(touch, element) {
+	  var $element = $(element);
+	  var offset = $element.offset();
+	  var x1 = offset.left;
+	  var x2 = offset.left + $element.width();
+	  var y1 = offset.top;
+	  var y2 = offset.top + $element.height();
+	  
+	  return (x1 <= touch.x && touch.x <= x2 && y1 <= touch.y && touch.y <= y2);
 	};
 	
 	var _isTouchInElementLine = function(touch, element) {
