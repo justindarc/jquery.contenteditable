@@ -52,7 +52,7 @@
           ((isContentEditableSupported) ? '' : '' +
             '<div class="context-menu">' +
               '<div class="arrow"/>' +
-              '<div class="inner"><a href="#">Select</a><a href="#">Paste</a></div>' +
+              '<div class="inner"><a href="#select">Select</a><a href="#paste">Paste</a></div>' +
             '</div>'
             ) +
         '</div>' +
@@ -139,6 +139,7 @@
         var didMoveTouch = false;
         var isContextMenuVisible = false;
         var isFocused = false;
+        var selection;
         var touch;
         
         $contenteditable.append($active);
@@ -152,6 +153,45 @@
           left: ($active.offset().left - ($contextMenu.outerWidth() / 2)) + 'px',
           top: ($active.offset().top - $contextMenu.outerHeight()) + 'px'
         })
+        
+        $contextMenu.delegate('a', 'click', function(evt) {
+          var $this = $(this);
+          var href = $this.attr('href');
+          
+          switch (href) {
+            case '#select':
+              var words = $active.text().split(String.fromCharCode(160));
+              
+              if (words.length > 0) {
+                var startIndex = -1;
+                var endIndex = -1;
+                var html = '';
+                
+                for (var i = 0; i < words.length; i++) {
+                  startIndex = endIndex + 1;
+                  endIndex = startIndex + words[i].length;
+                  
+                  if (startIndex <= activeIndex && activeIndex <= endIndex) {
+                    selection = words[i];
+                    html += '<span class="selected">' + words[i] + '</span>';
+                  } else {
+                    html += words[i];
+                  }
+                  
+                  html += ((i < words.length - 1) ? '&nbsp;' : '');
+                }
+                
+                $active.html(html);
+              }
+              
+              break;
+            case '#paste':
+              
+              break;
+            default:
+              break;
+          }
+        });
         
         $(document.body).bind('mousedown touchstart', function(evt) {
           if (!$.contains(item, evt.target)) {
