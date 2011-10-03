@@ -74,8 +74,48 @@
       
       $nav.delegate('a', 'click', function(evt) {
         var $this = $(this);
+        var $parent = $this.parent();
+        var href = $this.attr('href');
         
-        $this.parent().toggleClass('active');
+        $parent.toggleClass('active');
+
+        var isActive = $parent.hasClass('active');
+        
+        if (isActive) {
+          switch (href) {
+            case '#bold':
+              $active.html('<strong>' + $active.html() + '</strong>');
+              break;
+            case '#italic':
+              $active.html('<em>' + $active.html() + '</em>');
+              break;
+            case '#underline':
+              $active.html('<u>' + $active.html() + '</u>');
+              break;
+            case '#strikethrough':
+            
+              break;
+            default:
+              break;
+          }
+        } else {
+          switch (href) {
+            case '#bold':
+              $active.html($active.children('strong').html());
+              break;
+            case '#italic':
+              $active.html($active.children('em').html());
+              break;
+            case '#underline':
+              $active.html($active.children('u').html());
+              break;
+            case '#strikethrough':
+            
+              break;
+            default:
+              break;
+          }
+        }
 
         if (!isContentEditableSupported) {
           $cursor.focus();
