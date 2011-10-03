@@ -178,6 +178,7 @@
                 if (i === elements.length - 1 || _isTouchInElementLine(touch, elements[i])) {
                   var $element = $(elements[i]);
                   var characters = $element.text().split('');
+                  var html = $element.html();
                 
                   if (characters.length > 0) {
                     $element.html('<span>' + characters.join('</span><span>') + '</span>');
@@ -203,7 +204,8 @@
                     offset = $element.offset();
                     offset.left += $element.width();
                   }
-                
+                  
+                  $element.html(html);
                   $active = $element;
                 
                   $cursor.css({
