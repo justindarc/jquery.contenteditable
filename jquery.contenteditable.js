@@ -49,10 +49,10 @@
           '</div>' +
           '<div class="contenteditable"' + ((isContentEditableSupported) ? ' contenteditable="true"' : '') + '/>' +
           ((isContentEditableSupported) ? '' : '<input type="text" class="cursor" autocapitalize="off"/>') +
-          ((true) ? '' : '' + // TODO: Replace with isContentEditableSupported
+          ((isContentEditableSupported) ? '' : '' +
             '<div class="context-menu">' +
               '<div class="arrow"/>' +
-              '<div class="inner"><a href="#">Select</a></div>' +
+              '<div class="inner"><a href="#">Select</a><a href="#">Paste</a></div>' +
             '</div>'
             ) +
         '</div>' +
@@ -94,7 +94,12 @@
         var $cursor = $item.find('input.cursor');
         var $contextMenu = $item.find('div.context-menu');
         var $active = $('<div/>');
+        
         var activeIndex = 0;
+        var didMoveTouch = false;
+        var isContextMenuVisible = false;
+        var isFocused = false;
+        var touch;
         
         $contenteditable.append($active);
         
@@ -108,11 +113,10 @@
           top: ($active.offset().top - $contextMenu.outerHeight()) + 'px'
         })
         
-        var touch = null;
-        
         $(document.body).bind('mousedown touchstart', function(evt) {
           if (!$.contains(item, evt.target)) {
             $cursor.blur();
+            isFocused = false;
           }
         });
         
@@ -121,15 +125,12 @@
           
           if (evt.type === 'touchstart') {            
             if (evt.originalEvent && evt.originalEvent.touches) {
+              didMoveTouch = false;
+              
               touch = {
                 x: evt.originalEvent.touches[0].clientX,
                 y: evt.originalEvent.touches[0].clientY
               };
-              
-              $cursor.css({
-                left: touch.x + 'px',
-                top: touch.y + 'px'
-              });
             }
           } else {
             $cursor.blur();
@@ -141,6 +142,8 @@
           
           if (evt.type === 'touchmove') {
             if (evt.originalEvent.touches) {
+              didMoveTouch = true;
+              
               touch = {
                 x: evt.originalEvent.touches[0].clientX,
                 y: evt.originalEvent.touches[0].clientY
@@ -167,48 +170,72 @@
 
             var elements = $contenteditable.find('div');
             
-            for (var i = 0; i < elements.length; i++) {
-              if (i === elements.length - 1 || _isTouchInElementLine(touch, elements[i])) {
-                var $element = $(elements[i]);
-                var characters = $element.text().split('');
+            if (didMoveTouch) {
+              $contextMenu.hide();
+              isContextMenuVisible = false;
+              
+              for (var i = 0; i < elements.length; i++) {
+                if (i === elements.length - 1 || _isTouchInElementLine(touch, elements[i])) {
+                  var $element = $(elements[i]);
+                  var characters = $element.text().split('');
                 
-                if (characters.length > 0) {
-                  $element.html('<span>' + characters.join('</span><span>') + '</span>');
-                }
-
-                var offset;
-                var spans = $element.children('span');
-                
-                // Locate character position using <span/> tags.
-                for (var j = 0; j < spans.length; j++) {
-                  if (_isTouchInElement(touch, spans[j])) {
-                    var $span = $(spans[j]);
-                    
-                    activeIndex = j;
-                    offset = $span.offset();
-                    
-                    break;
+                  if (characters.length > 0) {
+                    $element.html('<span>' + characters.join('</span><span>') + '</span>');
                   }
+
+                  var offset;
+                  var spans = $element.children('span');
+                
+                  // Locate character position using <span/> tags.
+                  for (var j = 0; j < spans.length; j++) {
+                    if (_isTouchInElement(touch, spans[j])) {
+                      var $span = $(spans[j]);
+                    
+                      activeIndex = j;
+                      offset = $span.offset();
+                    
+                      break;
+                    }
+                  }
+                
+                  if (!offset) {
+                    activeIndex = characters.length;
+                    offset = $element.offset();
+                    offset.left += $element.width();
+                  }
+                
+                  $active = $element;
+                
+                  $cursor.css({
+                    left: offset.left + 'px',
+                    top: offset.top + 'px'
+                  });
+                
+                  break;
                 }
+              }
+            } else if (isFocused) {
+              if (isContextMenuVisible) {
+                $contextMenu.fadeOut(200);
+              } else {
+                var contextMenuOffset = $cursor.offset();
                 
-                if (!offset) {
-                  activeIndex = characters.length;
-                  offset = $element.offset();
-                  offset.left += $element.width();
-                }
+                contextMenuOffset.left -= ($contextMenu.outerWidth() / 2) - $cursor.width();
+                contextMenuOffset.top -= $contextMenu.outerHeight();
                 
-                $active = $element;
-                
-                $cursor.css({
-                  left: offset.left + 'px',
-                  top: offset.top + 'px'
+                $contextMenu.css({
+                  left: contextMenuOffset.left + 'px',
+                  top: contextMenuOffset.top + 'px'
                 });
                 
-                break;
+                $contextMenu.fadeIn(200);
               }
+              
+              isContextMenuVisible = !isContextMenuVisible;
             }
           } else {
             $cursor.focus();
+            isFocused = true;
           }
         });
         
@@ -217,6 +244,9 @@
           
           var keyCode = evt.which;
           var text = ($active) ? $active.text() : '';
+          
+          $contextMenu.fadeOut(200);
+          isContextMenuVisible = false;
           
           if (keyCode === 8) {
             if ($active) {
